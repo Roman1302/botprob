@@ -4,19 +4,23 @@ def take_rational_part(user_number):
     # Функция возвращает рациональную часть из комплексного
     rational_part = []
     for k in range(0, len(user_number)):
-        if user_number[k] != ' ':
+        if user_number[k] != '-' and user_number[k] != '+' and user_number[k] != '/' and user_number[k] != '*':
+            # print(user_number[k])
             rational_part.append(user_number[k])
         else:
             break
     rational_part = float(''.join(rational_part))
+    # print(rational_part)
     return rational_part
 
 def take_imaginary_part(user_number):
     # Функция возвращает мнимую часть
     imaginary_part = []
+    # print(len(user_number))
     for i in range(0, len(user_number)):
         if user_number[i] == 'i':
-            while user_number[i] != ' ':
+            # print(user_number[i])
+            while user_number[i] != '-' and user_number[i] != '+' and user_number[i] != '/' and user_number[i] != '*':
                 imaginary_part.insert(0,user_number[i - 1])
                 i-= 1
     imaginary_part.pop(0)
@@ -71,7 +75,7 @@ def multiply(r1, s1, i1, r2, s2, i2):
     result = []
     result.append(r1*r2)
     # print('1', result)
-    if s1 == "+" and s2 == "+" or s1 == "-" and s2 == "-":
+    if s1 == "+" or s2 == "+" or s1 == "-" or s2 == "-":
         result.append(-i1*i2)
         # print('2', result)
     else:
@@ -105,7 +109,7 @@ def division(r1, s1, i1, r2, s2, i2):
     denominator = []
     result = []
     numerator.append(r1*r2)
-    if s1 == "+" and s2 == "+" or s1 == "-" and s2 == "-":
+    if s1 == "+" or s2 == "+" or s1 == "-" or s2 == "-":
         numerator.append(i1*i2)
     else:
         numerator.append(-i1*i2)
@@ -122,46 +126,50 @@ def division(r1, s1, i1, r2, s2, i2):
     numerator.pop(3)
     numerator.pop(2)
     denominator.append(r2**2+i2**2)
-    result.append(numerator[0]/denominator[0])
-    result.append(numerator[1]/denominator[0])
-    # print(result[1])
+    result.append(round(numerator[0]/denominator[0], 3))
+    result.append(round(numerator[1]/denominator[0], 3))
+    print(result)
     return result
 
 def record_in_file(result):
     # Добавлены результаты в файл
-    ot=[]
+    pr=[]
     with open('results.json', 'a') as data:
-        print('1', result[1])
-        if int(result[1]) != 0:
+        print('0',result[1])
+        if result[1] != 0:
             for i in range(0, 2):
-
                 if result[i] > 0 and i == 1:
-                    print('2', '+ ', end='')
+                    print('+ ', end='')
                     data.write('+ ')
+                    pr.append('+')
                 elif result[i] < 0 and i == 1:
                     result[i] = -result[i]
                     result[i] = str(result[i])
-                    print('3','- ', end='')
+                    print('- ', end='')
                     data.write('- ')
-                    print('4',result[i], end='')
-                    data.write(result[i])
-                elif i != 1:
-                    print('5', ' ', end='')
-                    data.write(' ')
-                elif result[i] ==0:
-                    print('6','', end='')
-                    data.write('')
+                    pr.append('-')
+                    # print(result[i], end='')
+                    # data.write(result[i])
+                    # pr.append(result[i])
                 else:
                     result[i] = str(result[i])
-                    print(f'7 {result[i]}', end='')
+                    print(f'{result[i]}', end='')
                     data.write(result[i])
-
-            print(f'8 {result[1]}i')
+                    pr.append(result[i])
+                if i != 1:
+                    print(' ', end='')
+                    data.write(' ')
+                    # pr.append(' ')
+            print(f'{result[1]}i')
             data.write(f'{result[1]}i\n')
+            pr.append(f'{result[1]}i')
         else:
             result[0] = str(result[0])
-            print(f'9 {result[0]}\n')
+            print(f'99 = {result[0]}\n')
             data.write(f'{result[0]}\n')
-    print('10',ot)
+            pr.append(result[0])
+    print(pr)
     data.close()
+    return pr
+
 

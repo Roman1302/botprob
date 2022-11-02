@@ -12,23 +12,22 @@ bot = telebot.TeleBot(API_TOKEN)
 @bot.message_handler(commands=['start'])
 def start_message(message):
     bot.send_message(message.chat.id,'Калькулятор запущен')
-
-# @bot.message_handler(commands=['button'])
-# def button_message(message):
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton("Комплексные числа"))
     markup.add(types.KeyboardButton("Рациональные числа"))
     bot.send_message(message.chat.id,'Выберите, с какими числами будем работать:',reply_markup=markup)
 
-@bot.message_handler(func= lambda message: message.text =='Комплексные числа')
+@bot.message_handler(func= lambda message: message.text =='Комплексные числа' or message.text =='/complex')
 def message_co(message):
     bot.send_message(message.from_user.id, 'Введите первое комплексное число по образцу: 2 + 5i')
     bot.register_next_step_handler(message, message_co1)
+    global idCom
+    idCom=message.chat.id
+    print(message.chat.id)
 
 def message_co1(message):
     global user_komplex1
     user_komplex1 = message.text
-    # print("1", user_komplex1)
 
     markup=types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton("+"))
@@ -36,73 +35,73 @@ def message_co1(message):
     markup.add(types.KeyboardButton("/"))
     markup.add(types.KeyboardButton("*"))
 
-    bot.send_message(message.from_user.id, 'Выбирите фун',reply_markup=markup)
+    bot.send_message(message.from_user.id, 'Выбирите действие',reply_markup=markup)
     bot.register_next_step_handler(message, message_co2)
 
 def message_co2(message):
     global operation
     operation = message.text
-    # print("2", operation)
     bot.send_message(message.from_user.id, 'Введите второе комплексное число по образцу: 2 + 5i')
     bot.register_next_step_handler(message, message_co3)
 
 def message_co3(message):
     global user_komplex2
     user_komplex2 = message.text
-    # print(user_komplex2)
-    insert_co4()
+    insert_rec()
     compl()
+    print(*resCom)
+    bot.send_message(message.from_user.id, f'*Ответ: {"".join(resCom)}*', parse_mode= 'Markdown')
 
-def insert_co4():
-    # Функция приглашает пользователя для ввода двух комплексных чисел и операции между ними
-    # print(f'"1" ({user_komplex1}){operation}({user_komplex2}) = ', end='')
+def insert_rec():
+    # Функция записывает введенные данные пользователя
     time = dt.now().strftime('%d.%m.%Y %H:%M:%S')
     with open('results.json', 'a') as data:
-        data.write(f'{time} ({user_komplex1}){operation}({user_komplex2}) = ')
+        data.write(f'{time} {idCom} : ({user_komplex1}){operation}({user_komplex2}) = ')
     data.close()
-    # return [user_komplex1, user_komplex2, operation]
+
 
 
 def compl():
     operands = [user_komplex1, user_komplex2, operation]
-    # print('o',operands)
-    dfg=0
+    global resCom
     if operands[2] == "+":
-        opCom.record_in_file(opCom.addition(opCom.take_rational_part(operands[0]),
+        resCom=opCom.record_in_file(opCom.addition(opCom.take_rational_part(operands[0]),
                                             opCom.take_symbol(operands[0]),
                                             opCom.take_imaginary_part(operands[0]),
                                             opCom.take_rational_part(operands[1]),
                                             opCom.take_symbol(operands[1]),
                                             opCom.take_imaginary_part(operands[1])))
     elif operands[2] == "-":
-        opCom.record_in_file(opCom.deduction(opCom.take_rational_part(operands[0]),
+        resCom=opCom.record_in_file(opCom.deduction(opCom.take_rational_part(operands[0]),
                                              opCom.take_symbol(operands[0]),
                                              opCom.take_imaginary_part(operands[0]),
                                              opCom.take_rational_part(operands[1]),
                                              opCom.take_symbol(operands[1]),
                                              opCom.take_imaginary_part(operands[1])))
     elif operands[2] == "*":
-        opCom.record_in_file(opCom.multiply(opCom.take_rational_part(operands[0]),
+        resCom=opCom.record_in_file(opCom.multiply(opCom.take_rational_part(operands[0]),
                                             opCom.take_symbol(operands[0]),
                                             opCom.take_imaginary_part(operands[0]),
                                             opCom.take_rational_part(operands[1]),
                                             opCom.take_symbol(operands[1]),
                                             opCom.take_imaginary_part(operands[1])))
     else:
-        opCom.record_in_file(opCom.division(opCom.take_rational_part(operands[0]),
+        resCom=opCom.record_in_file(opCom.division(opCom.take_rational_part(operands[0]),
                                             opCom.take_symbol(operands[0]),
                                             opCom.take_imaginary_part(operands[0]),
                                             opCom.take_rational_part(operands[1]),
                                             opCom.take_symbol(operands[1]),
                                             opCom.take_imaginary_part(operands[1])))
-    print('dfg', dfg)
+    print('dfg', resCom)
 
 
-@bot.message_handler(func= lambda message: message.text =='Рациональные числа')
+@bot.message_handler(func= lambda message: message.text =='Рациональные числа' or message.text =='/rational')
 
 def message_vid(message):
     bot.send_message(message.from_user.id, 'Выберите первое число с плавающей точкой:')
     bot.register_next_step_handler(message, message_re)
+    global idRat
+    idRat = message.chat.id
     print(message.chat.id)
 def message_re(message):
     global firstnum
@@ -127,9 +126,9 @@ def message_re2(message):
     global secondnum
     secondnum = message.text
     print(secondnum)
-    asd = oprat.mainterminal(firstnum, operat, secondnum)
+    asd = oprat.mainterminal(firstnum, operat, secondnum, idRat)
     print('asd', asd)
-    bot.send_message(message.from_user.id, f'Ответ: {asd}')
+    bot.send_message(message.from_user.id, f'*Ответ: {asd}*', parse_mode= 'Markdown')
 
 
 bot.infinity_polling()

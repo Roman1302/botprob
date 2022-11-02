@@ -25,13 +25,13 @@ def res(first, select, second):
     else:
         print('Недопустимый символ')
 
-def mainterminal(x, selectoperation, y):
+def mainterminal(x, selectoperation, y, id):
     x = float(x.replace(',', '.'))
     oper = selectoperation
     y = float(y.replace(',', '.'))
     res = op.res(x, oper, y)
     time = dt.now().strftime('%d.%m.%Y %H:%M:%S')
     with open('results.json', 'a') as data:
-        data.write(f'{time} Результат {x} {oper} {y} = {res}\n')
+        data.write(f'{time} {id} : Результат {x} {oper} {y} = {res}\n')
     print(f'Результат {x} {oper} {y} = {res}\n')
     return res
